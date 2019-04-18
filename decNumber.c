@@ -3618,7 +3618,9 @@ decNumber * decNumberZero(decNumber *dn) {
 // invalid.
 static void decToString(const decNumber *dn, char *string, Flag eng) {
   Int exp=dn->exponent;       // local copy
+#ifndef DECSTRING_NO_EXPONENT
   Int e;                      // E-part value
+#endif // DECSTRING_NO_EXPONENT
   Int pre;                    // digits before the '.'
   Int cut;                    // for counting digits in a Unit
   char *c=string;             // work [output pointer]
@@ -3668,6 +3670,7 @@ static void decToString(const decNumber *dn, char *string, Flag eng) {
 
   /* non-0 exponent -- assume plain form */
   pre=dn->digits+exp;              // digits before '.'
+#ifndef DECSTRING_NO_EXPONENT
   e=0;                             // no E
   if ((exp>0) || (pre<-5)) {       // need exponential form
     e=exp+dn->digits-1;            // calculate E value
@@ -3696,6 +3699,7 @@ static void decToString(const decNumber *dn, char *string, Flag eng) {
         } // zero
       } // eng
     } // need exponent
+#endif // DECSTRING_NO_EXPONENT
 
   /* lay out the digits of the coefficient, adding 0s and . as needed */
   u=*up;
@@ -3739,6 +3743,7 @@ static void decToString(const decNumber *dn, char *string, Flag eng) {
       }
     }
 
+#ifndef DECSTRING_NO_EXPONENT
   /* Finally add the E-part, if needed.  It will never be 0, has a
      base maximum and minimum of +999999999 through -999999999, but
      could range down to -1999999998 for anormal numbers */
@@ -3759,6 +3764,7 @@ static void decToString(const decNumber *dn, char *string, Flag eng) {
       c++;                              // step for next
       } // cut
     }
+#endif // DECSTRING_NO_EXPONENT
   *c='\0';          // terminate the string (all paths)
   return;
   } // decToString

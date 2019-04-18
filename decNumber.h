@@ -50,6 +50,11 @@
   #if !defined(DECNUMDIGITS)
     #define DECNUMDIGITS 1
   #endif
+  /*
+   * Undefine the macro if you want to convert decNumber to string
+   * with exponent (e.g. "1.5e-6" instead of "0.0000015")
+   */
+  #define DECSTRING_NO_EXPONENT
 
   /* The size (integer data type) of each unit is determined by the   */
   /* number of digits it will hold.                                   */
