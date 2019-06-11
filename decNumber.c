@@ -344,6 +344,15 @@ decNumber * decNumberFromInt32(decNumber *dn, Int in) {
   return dn;
   } // decNumberFromInt32
 
+decNumber * decNumberFromInt64(decNumber *dn, Long in) {
+  uLong unsig;
+  if (in>=0) unsig=in;
+   else unsig=-(uLong)in;
+  decNumberFromUInt64(dn, unsig);
+  if (in<0) dn->bits=DECNEG;
+  return dn;
+  } // decNumberFromInt64
+
 decNumber * decNumberFromUInt32(decNumber *dn, uInt uin) {
   Unit *up;                             // work pointer
   decNumberZero(dn);                    // clean
@@ -355,6 +364,18 @@ decNumber * decNumberFromUInt32(decNumber *dn, uInt uin) {
   dn->digits=decGetDigits(dn->lsu, up-dn->lsu);
   return dn;
   } // decNumberFromUInt32
+
+decNumber * decNumberFromUInt64(decNumber *dn, uLong uin) {
+  Unit *up;
+  decNumberZero(dn);
+  if (uin == 0) return dn;
+  for (up=dn->lsu; uin>0; up++) {
+    *up=(Unit)(uin%(DECDPUNMAX+1));
+    uin=uin/(DECDPUNMAX+1);
+    }
+  dn->digits=decGetDigits(dn->lsu, up-dn->lsu);
+  return dn;
+  } // decNumberFromUInt64
 
 /* ------------------------------------------------------------------ */
 /* to-int32 -- conversion to Int or uInt                              */
