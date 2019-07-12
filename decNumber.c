@@ -423,6 +423,33 @@ Int decNumberToInt32(const decNumber *dn, decContext *set) {
   return 0;
   } // decNumberToInt32
 
+Long decNumberToInt64(const decNumber *dn, decContext *set) {
+  if (dn->bits&DECSPECIAL || dn->digits>19 || dn->exponent!=0) ;
+   else {
+    Int d;
+    const Unit *up;
+    uLong hi=0, lo;
+    up=dn->lsu;
+    lo=*up;
+    #if DECDPUN>1
+      hi=lo/10;
+      lo=lo%10;
+    #endif
+    up++;
+    for (d=DECDPUN; d<dn->digits; up++, d+=DECDPUN) hi+=*up*bigpowers[d-1];
+    if (hi>922337203685477580 || (hi==922337203685477580 && lo>7)) {
+      if (dn->bits&DECNEG && hi==922337203685477580 && lo==8) return 0x8000000000000000;
+      }
+    else {
+      Long i=X10(hi)+lo;
+      if (dn->bits&DECNEG) return -i;
+      return i;
+      }
+    }
+  decContextSetStatus(set, DEC_Invalid_operation);
+  return 0;
+  } // decNumberToInt64
+
 uInt decNumberToUInt32(const decNumber *dn, decContext *set) {
   #if DECCHECK
   if (decCheckOperands(DECUNRESU, DECUNUSED, dn, set)) return 0;
@@ -451,6 +478,28 @@ uInt decNumberToUInt32(const decNumber *dn, decContext *set) {
   decContextSetStatus(set, DEC_Invalid_operation); // [may not return]
   return 0;
   } // decNumberToUInt32
+
+uLong decNumberToUInt64(const decNumber *dn, decContext *set) {
+  if (dn->bits&DECSPECIAL || dn->digits>20 || dn->exponent!=0
+    || (dn->bits&DECNEG && !ISZERO(dn)));
+   else {
+    Int d;
+    const Unit *up;
+    uLong hi=0, lo;
+    up=dn->lsu;
+    lo=*up;
+    #if DECDPUNL>1
+      hi=lo/10;
+      lo=lo%10;
+    #endif
+    up++;
+    for (d=DECDPUN; d<dn->digits; up++, d+=DECDPUN) hi+=*up*bigpowers[d-1];
+    if (hi>1844674407370955161 || (hi==1844674407370955161 && lo>5)) ;
+     else return X10(hi)+lo;
+    }
+  decContextSetStatus(set, DEC_Invalid_operation);
+  return 0;
+  }  // decNumberToUInt64
 
 /* ------------------------------------------------------------------ */
 /* to-scientific-string -- conversion to numeric string               */
