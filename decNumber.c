@@ -162,9 +162,9 @@
 /*      **  -- raise to the power                                     */
 /* ------------------------------------------------------------------ */
 
+#include <string.h>                // for strcpy
 #include <stdlib.h>                // for malloc, free, etc.
 #include <stdio.h>                 // for printf [if needed]
-#include <string.h>                // for strcpy
 #include <ctype.h>                 // for lower
 #include "decNumber.h"             // base number library
 #include "decNumberLocal.h"        // decNumber local types, etc.
