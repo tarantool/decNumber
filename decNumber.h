@@ -105,7 +105,7 @@
   decNumber * decNumberFromUInt32(decNumber *, uint32_t);
   decNumber * decNumberFromInt64(decNumber *, int64_t);
   decNumber * decNumberFromUInt64(decNumber *, uint64_t);
-  decNumber * decNumberFromString(decNumber *, const char *, decContext *);
+  const char * decNumberFromString(decNumber *, const char *, decContext *);
   char      * decNumberToString(const decNumber *, char *);
   char      * decNumberToEngString(const decNumber *, char *);
   uint32_t    decNumberToUInt32(const decNumber *, decContext *);

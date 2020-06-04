@@ -545,8 +545,8 @@ char * decNumberToEngString(const decNumber *dn, char *string){
 /*                                                                    */
 /* If bad syntax is detected, the result will be a quiet NaN.         */
 /* ------------------------------------------------------------------ */
-decNumber * decNumberFromString(decNumber *dn, const char chars[],
-                                decContext *set) {
+const char * decNumberFromString(decNumber *dn, const char chars[],
+                                 decContext *set) {
   Int   exponent=0;                // working exponent [assume 0]
   uByte bits=0;                    // working flags [assume +ve]
   Unit  *res;                      // where result will be built
@@ -557,6 +557,7 @@ decNumber * decNumberFromString(decNumber *dn, const char chars[],
   const char *dotchar=NULL;        // where dot was found
   const char *cfirst=chars;        // -> first character of decimal part
   const char *last=NULL;           // -> last digit of decimal part
+  const char *end=chars;
   const char *c;                   // work
   Unit  *up;                       // ..
   #if DECDPUN>1
@@ -649,17 +650,18 @@ decNumber * decNumberFromString(decNumber *dn, const char chars[],
 
      else if (*c!='\0') {          // more to process...
       // had some digits; exponent is only valid sequence now
+      status=0;                    // we have a number already
+      end=c;                       // backup for invalid exponent
       Flag nege;                   // 1=negative exponent
       const char *firstexp;        // -> first significant exponent digit
-      status=DEC_Conversion_syntax;// assume the worst
-      if (*c!='e' && *c!='E') break;
+      if (*c!='e' && *c!='E') goto finalize;
       /* Found 'e' or 'E' -- now process explicit exponent */
       // 1998.07.11: sign no longer required
       nege=0;
       c++;                         // to (possible) sign
       if (*c=='-') {nege=1; c++;}
        else if (*c=='+') c++;
-      if (*c=='\0') break;
+      if (*c<'0' || *c>'9') goto finalize;
 
       for (; *c=='0' && *(c+1)!='\0';) c++;  // strip insignificant zeros
       firstexp=c;                            // save exponent digit place
@@ -667,8 +669,8 @@ decNumber * decNumberFromString(decNumber *dn, const char chars[],
         if (*c<'0' || *c>'9') break;         // not a digit
         exponent=X10(exponent)+(Int)*c-(Int)'0';
         } // c
-      // if not now on a '\0', *c must not be a digit
-      if (*c!='\0') break;
+
+      end=c;
 
       // (this next test must be after the syntax checks)
       // if it was too long the exponent may have wrapped, so check
@@ -678,9 +680,10 @@ decNumber * decNumberFromString(decNumber *dn, const char chars[],
         // [up to 1999999999 is OK, for example 1E-1000000998]
         }
       if (nege) exponent=-exponent;     // was negative
-      status=0;                         // is OK
       } // stuff after digits
 
+      else end=c;
+finalize:
     // Here when whole string has been inspected; syntax is good
     // cfirst->first digit (never dot), last->last digit (ditto)
 
@@ -772,7 +775,7 @@ decNumber * decNumberFromString(decNumber *dn, const char chars[],
 
   if (allocres!=NULL) free(allocres);   // drop any storage used
   if (status!=0) decStatus(dn, status, set);
-  return dn;
+  return end;
   } /* decNumberFromString */
 
 /* ================================================================== */
