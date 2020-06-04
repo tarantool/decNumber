@@ -173,6 +173,7 @@
   /* Functions for testing decNumbers (normality depends on context)  */
   int32_t decNumberIsNormal(const decNumber *, decContext *);
   int32_t decNumberIsSubnormal(const decNumber *, decContext *);
+  int32_t decNumberIsInt(const decNumber *dn);
 
   /* Macros for testing decNumber *dn                                 */
   #define decNumberIsCanonical(dn) (1)  /* All decNumbers are saintly */

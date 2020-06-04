@@ -501,6 +501,33 @@ uLong decNumberToUInt64(const decNumber *dn, decContext *set) {
   return 0;
   }  // decNumberToUInt64
 
+int32_t decNumberIsInt(const decNumber *dn) {
+  const Unit *up=dn->lsu;
+  if (dn->exponent>=0) {
+    return 1;
+    }
+   else {
+    Int count=-dn->exponent;
+    // spin up whole units until reach the Unit with the unit digit
+    for (; count>=DECDPUN; up++) {
+      if (*up!=0) return 0;
+      count-=DECDPUN;
+      }
+    if (count==0) return 1;             // [a multiple of DECDPUN]
+     else {                             // [not multiple of DECDPUN]
+      Int rem;                          // work
+      // slice off fraction digits and check for non-zero
+      #if DECDPUN<=4
+        rem=*up-QUOT10(*up, count)*powers[count];
+      #else
+        rem=*up%powers[count];          // slice off discards
+      #endif
+      if (rem!=0) return 0;
+      }
+    }
+    return 1;
+  }  // decNumberIsInt
+
 /* ------------------------------------------------------------------ */
 /* to-scientific-string -- conversion to numeric string               */
 /* to-engineering-string -- conversion to numeric string              */
