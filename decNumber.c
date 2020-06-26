@@ -488,7 +488,7 @@ uLong decNumberToUInt64(const decNumber *dn, decContext *set) {
     uLong hi=0, lo;
     up=dn->lsu;
     lo=*up;
-    #if DECDPUNL>1
+    #if DECDPUN>1
       hi=lo/10;
       lo=lo%10;
     #endif
