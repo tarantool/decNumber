@@ -553,7 +553,11 @@ static decFloat * decDivide(decFloat *result, const decFloat *dfl,
 
   // complete the bcdnum; quodigits is correct, so the position of
   // the first non-zero is known
-  num.msd=bcdacc+1+(msuq-lsuq+1)*9-quodigits;
+  // GCC will generate an array bound error in later code (line 620) since it
+  // sees the assignment of num.msd to bcdacc and does not consider the +1.
+  //num.msd=bcdacc+1+(msuq-lsuq+1)*9-quodigits;
+  num.msd=(&bcdacc[1]);
+  num.msd+=(msuq-lsuq+1)*9-quodigits;
   num.lsd=ub;
 
   // make exponent adjustments, etc
@@ -608,7 +612,7 @@ static decFloat * decDivide(decFloat *result, const decFloat *dfl,
         *num.lsd=0;                // .. [sign still relevant]
         }
       }
-     else {                        // round to nearest even [sigh]
+    else {                         // round to nearest even [sigh]
       // round-to-nearest, in-place; msd is at or to right of bcdacc+1
       // (this is a special case of Quantize -- q.v. for commentary)
       uByte *roundat;              // -> re-round digit
@@ -3038,7 +3042,7 @@ decFloat * decFloatQuantize(decFloat *result,
         case DEC_ROUND_FLOOR: {
           // same as _UP for negative numbers, and as _DOWN for positive
           // [negative reround cannot occur on 0]
-          if (sourhil&DECFLOAT_Sign && reround>0) bump=1;
+          if ((sourhil&DECFLOAT_Sign) && reround>0) bump=1;
           break;} // r-f
         case DEC_ROUND_05UP: {
           if (reround>0) { // anything out there is 'sticky'

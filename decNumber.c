@@ -393,7 +393,7 @@ Int decNumberToInt32(const decNumber *dn, decContext *set) {
   #endif
 
   // special or too many digits, or bad exponent
-  if (dn->bits&DECSPECIAL || dn->digits>10 || dn->exponent!=0) ; // bad
+  if ((dn->bits&DECSPECIAL) || dn->digits>10 || dn->exponent!=0){;} // bad
    else { // is a finite integer with 10 or fewer digits
     Int d;                         // work
     const Unit *up;                // ..
@@ -410,7 +410,7 @@ Int decNumberToInt32(const decNumber *dn, decContext *set) {
     // now low has the lsd, hi the remainder
     if (hi>214748364 || (hi==214748364 && lo>7)) { // out of range?
       // most-negative is a reprieve
-      if (dn->bits&DECNEG && hi==214748364 && lo==8) return 0x80000000;
+      if ((dn->bits&DECNEG) && hi==214748364 && lo==8) return 0x80000000;
       // bad -- drop through
       }
      else { // in-range always
@@ -455,8 +455,8 @@ uInt decNumberToUInt32(const decNumber *dn, decContext *set) {
   if (decCheckOperands(DECUNRESU, DECUNUSED, dn, set)) return 0;
   #endif
   // special or too many digits, or bad exponent, or negative (<0)
-  if (dn->bits&DECSPECIAL || dn->digits>10 || dn->exponent!=0
-    || (dn->bits&DECNEG && !ISZERO(dn)));                   // bad
+  if ((dn->bits&DECSPECIAL) || dn->digits>10 || dn->exponent!=0
+    || ((dn->bits&DECNEG) && !ISZERO(dn))){;}               // bad
    else { // is a finite integer with 10 or fewer digits
     Int d;                         // work
     const Unit *up;                // ..
@@ -472,7 +472,7 @@ uInt decNumberToUInt32(const decNumber *dn, decContext *set) {
     for (d=DECDPUN; d<dn->digits; up++, d+=DECDPUN) hi+=*up*powers[d-1];
 
     // now low has the lsd, hi the remainder
-    if (hi>429496729 || (hi==429496729 && lo>5)) ; // no reprieve possible
+    if (hi>429496729 || (hi==429496729 && lo>5)){;} // no reprieve possible
      else return X10(hi)+lo;
     } // integer
   decContextSetStatus(set, DEC_Invalid_operation); // [may not return]
@@ -1574,8 +1574,8 @@ decNumber * decNumberLog10(decNumber *res, const decNumber *rhs,
 
     // skip the division if the result so far is infinite, NaN, or
     // zero, or there was an error; note NaN from sNaN needs copy
-    if (status&DEC_NaNs && !(status&DEC_sNaN)) break;
-    if (a->bits&DECSPECIAL || ISZERO(a)) {
+    if ((status&DEC_NaNs) && !(status&DEC_sNaN)) break;
+    if ((a->bits&DECSPECIAL) || ISZERO(a)) {
       decNumberCopy(res, a);            // [will fit]
       break;}
 
@@ -2295,7 +2295,7 @@ decNumber * decNumberPower(decNumber *res, const decNumber *lhs,
       for (i=1;;i++){              // for each bit [top bit ignored]
         // abandon if had overflow or terminal underflow
         if (status & (DEC_Overflow|DEC_Underflow)) { // interesting?
-          if (status&DEC_Overflow || ISZERO(dac)) break;
+          if ((status&DEC_Overflow) || ISZERO(dac)) break;
           }
         // [the following two lines revealed an optimizer bug in a C++
         // compiler, with symptom: 5**3 -> 25, when n=n+n was used]
@@ -4395,7 +4395,7 @@ static decNumber * decDivideOp(decNumber *res,
       // one or two infinities
       if (decNumberIsInfinite(lhs)) {   // LHS (dividend) is infinite
         if (decNumberIsInfinite(rhs) || // two infinities are invalid ..
-            op & (REMAINDER | REMNEAR)) { // as is remainder of infinity
+            (op&(REMAINDER | REMNEAR))) { // as is remainder of infinity
           *status|=DEC_Invalid_operation;
           break;
           }
@@ -4489,7 +4489,7 @@ static decNumber * decDivideOp(decNumber *res,
       // fastpath remainders so long as the lhs has the smaller
       // (or equal) exponent
       if (lhs->exponent<=rhs->exponent) {
-        if (op&REMAINDER || exponent<-1) {
+        if ((op&REMAINDER) || exponent<-1) {
           // It is REMAINDER or safe REMNEAR; result is [finished
           // clone of] lhs  (r = x - 0*y)
           residue=0;
@@ -5571,7 +5571,7 @@ decNumber * decExpOp(decNumber *res, const decNumber *rhs,
       for (i=1;;i++){              // for each bit [top bit ignored]
         // abandon if have had overflow or terminal underflow
         if (*status & (DEC_Overflow|DEC_Underflow)) { // interesting?
-          if (*status&DEC_Overflow || ISZERO(t)) break;}
+          if ((*status&DEC_Overflow) || ISZERO(t)) break;}
         n=n<<1;                    // move next bit to testable position
         if (n<0) {                 // top bit is set
           seenbit=1;               // OK, have a significant bit
@@ -6153,7 +6153,7 @@ decNumber * decCompareOp(decNumber *res, const decNumber *lhs,
     // This assumes sNaN (even just one) leads to NaN.
     merged=(lhs->bits | rhs->bits) & (DECSNAN | DECNAN);
     if (merged) {                       // a NaN bit set
-      if (op==COMPARE);                 // result will be NaN
+      if (op==COMPARE){;}               // result will be NaN
        else if (op==COMPSIG)            // treat qNaN as sNaN
         *status|=DEC_Invalid_operation | DEC_sNaN;
        else if (op==COMPTOTAL) {        // total ordering, always finite
@@ -6174,7 +6174,7 @@ decNumber * decCompareOp(decNumber *res, const decNumber *lhs,
         break;
         } // total order
 
-       else if (merged & DECSNAN);           // sNaN -> qNaN
+       else if (merged & DECSNAN){;}         // sNaN -> qNaN
        else { // here if MIN or MAX and one or two quiet NaNs
         // min or max -- 754 rules ignore single NaN
         if (!decNumberIsNaN(lhs) || !decNumberIsNaN(rhs)) {
@@ -6212,7 +6212,7 @@ decNumber * decCompareOp(decNumber *res, const decNumber *lhs,
         if (result<0) res->bits=DECNEG;
         }
       }
-     else if (op==COMPNAN);             // special, drop through
+     else if (op==COMPNAN){;}           // special, drop through
      else {                             // MAX or MIN, non-NaN result
       Int residue=0;                    // rounding accumulator
       // choose the operand for the result
@@ -7798,12 +7798,12 @@ static decNumber * decNaNs(decNumber *res, const decNumber *lhs,
   // and status updated if need be
   if (lhs->bits & DECSNAN)
     *status|=DEC_Invalid_operation | DEC_sNaN;
-   else if (rhs==NULL);
+   else if (rhs==NULL){;}
    else if (rhs->bits & DECSNAN) {
     lhs=rhs;
     *status|=DEC_Invalid_operation | DEC_sNaN;
     }
-   else if (lhs->bits & DECNAN);
+   else if (lhs->bits & DECNAN){;}
    else lhs=rhs;
 
   // propagate the payload
